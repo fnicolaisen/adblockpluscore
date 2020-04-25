@@ -72,8 +72,8 @@ describe("Filter listener", function()
 
     let {snippets} = sandboxedRequire("../lib/snippets");
     result.snippets = [];
-    for (let filter of snippets._filters)
-      result.snippets.push(filter.text);
+    for (let filterText of snippets._filters)
+      result.snippets.push(filterText);
 
     let types = ["blocking", "whitelist", "elemhide", "elemhideexception",
                  "elemhideemulation", "snippets"];
