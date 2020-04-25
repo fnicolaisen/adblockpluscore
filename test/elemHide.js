@@ -278,21 +278,27 @@ describe("Element hiding", function()
 
   it("Filters by domain", function()
   {
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 0);
 
     elemHide.add(Filter.fromText("##test"));
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 0);
 
     elemHide.add(Filter.fromText("example.com##test"));
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 1);
 
     elemHide.add(Filter.fromText("example.com,~www.example.com##test"));
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 2);
 
     elemHide.remove(Filter.fromText("example.com##test"));
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 2);
 
     elemHide.remove(Filter.fromText("example.com,~www.example.com##test"));
+    elemHide._prepareForMatching();
     assert.equal(elemHide._filtersByDomain.size, 0);
   });
 
