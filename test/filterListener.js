@@ -44,8 +44,9 @@ describe("Filter listener", function()
       {
         for (let [keyword, set] of map)
         {
-          for (let filter of set)
+          for (let filterText of (typeof set == "string" ? [set] : set))
           {
+            let filter = Filter.fromText(filterText);
             assert.equal(matcher.findKeyword(filter), keyword,
                          "Keyword of filter " + filter.text);
             filters.push(filter.text);
@@ -97,7 +98,8 @@ describe("Filter listener", function()
       {IO} = sandboxedRequire("./stub-modules/io"),
       {filterStorage} = sandboxedRequire("../lib/filterStorage"),
       {filterEngine} = sandboxedRequire("../lib/filterEngine"),
-      {defaultMatcher} = sandboxedRequire("../lib/matcher")
+      {defaultMatcher} = sandboxedRequire("../lib/matcher"),
+      {Filter} = sandboxedRequire("../lib/filterClasses")
     );
   });
 
@@ -155,7 +157,6 @@ describe("Filter listener", function()
 
       (
         {Subscription, SpecialSubscription} = sandboxedRequire("../lib/subscriptionClasses"),
-        {Filter} = sandboxedRequire("../lib/filterClasses"),
         recommendations = sandboxedRequire("../data/subscriptions.json")
       );
 

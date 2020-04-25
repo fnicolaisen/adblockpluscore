@@ -337,7 +337,7 @@ describe("Matcher", function()
     for (let [key, value] of matcher._blocking._complexFiltersByKeyword)
     {
       assert.equal(key, "example");
-      assert.deepEqual(value, Filter.fromText("||example.com^$~third-party,image"));
+      assert.deepEqual(value, "||example.com^$~third-party,image");
       break;
     }
 
@@ -359,8 +359,8 @@ describe("Matcher", function()
       assert.equal(key, "example");
       assert.equal(value.size, 2);
 
-      assert.ok(value.has(Filter.fromText("||example.com^$~third-party,image")));
-      assert.ok(value.has(Filter.fromText("/example/*$~third-party,image")));
+      assert.ok(value.has("||example.com^$~third-party,image"));
+      assert.ok(value.has("/example/*$~third-party,image"));
 
       break;
     }
@@ -376,7 +376,7 @@ describe("Matcher", function()
     for (let [key, value] of matcher._blocking._complexFiltersByKeyword)
     {
       assert.equal(key, "example");
-      assert.deepEqual(value, Filter.fromText("/example/*$~third-party,image"));
+      assert.deepEqual(value, "/example/*$~third-party,image");
       break;
     }
 
