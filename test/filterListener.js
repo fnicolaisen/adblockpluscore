@@ -67,8 +67,8 @@ describe("Filter listener", function()
 
     let {elemHideEmulation} = sandboxedRequire("../lib/elemHideEmulation");
     result.elemhideemulation = [];
-    for (let filter of elemHideEmulation._filters)
-      result.elemhideemulation.push(filter.text);
+    for (let filterText of elemHideEmulation._filters)
+      result.elemhideemulation.push(filterText);
 
     let {snippets} = sandboxedRequire("../lib/snippets");
     result.snippets = [];
