@@ -5,13 +5,15 @@ This repository contains the generic Adblock Plus code that's shared between
 platforms. This repository is __not designed to be used directly__, but instead
 to serve as a dependency for `adblockpluschrome` and `libadblockplus`.
 
+__Note:__ This version is not for mere mortals.
+
 Running the unit tests
 ----------------------
 
 ### Requirements
 
 In order to run the unit test suite you need
-[Node.js 10.12.0 or higher](https://nodejs.org/). Once Node.js is installed
+[Node.js 14.0.0 or higher](https://nodejs.org/). Once Node.js is installed
 please run `npm install` in the repository directory in order to install the
 required dependencies.
 
