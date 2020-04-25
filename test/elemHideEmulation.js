@@ -21,6 +21,7 @@ const assert = require("assert");
 const {createSandbox} = require("./_common");
 
 let ElemHideEmulationFilter = null;
+let ElemHideException = null;
 let elemHideEmulation = null;
 let elemHideExceptions = null;
 let Filter = null;
@@ -32,7 +33,8 @@ describe("Element hiding emulation", function()
     let sandboxedRequire = createSandbox();
     (
       {Filter,
-       ElemHideEmulationFilter} = sandboxedRequire("../lib/filterClasses"),
+       ElemHideEmulationFilter,
+       ElemHideException} = sandboxedRequire("../lib/filterClasses"),
       {elemHideEmulation} = sandboxedRequire("../lib/elemHideEmulation"),
       {elemHideExceptions} = sandboxedRequire("../lib/elemHideExceptions")
     );
@@ -47,7 +49,7 @@ describe("Element hiding emulation", function()
         filter = Filter.fromText(filter);
         if (filter instanceof ElemHideEmulationFilter)
           elemHideEmulation.add(filter);
-        else
+        else if (filter instanceof ElemHideException)
           elemHideExceptions.add(filter);
       }
 

@@ -57,13 +57,13 @@ describe("Filter listener", function()
 
     let {elemHide} = sandboxedRequire("../lib/elemHide");
     result.elemhide = [];
-    for (let filter of elemHide._filters)
-      result.elemhide.push(filter.text);
+    for (let filterText of elemHide._filters)
+      result.elemhide.push(filterText);
 
     let {elemHideExceptions} = sandboxedRequire("../lib/elemHideExceptions");
     result.elemhideexception = [];
-    for (let exception of elemHideExceptions._exceptions)
-      result.elemhideexception.push(exception.text);
+    for (let filterText of elemHideExceptions._exceptions)
+      result.elemhideexception.push(filterText);
 
     let {elemHideEmulation} = sandboxedRequire("../lib/elemHideEmulation");
     result.elemhideemulation = [];
