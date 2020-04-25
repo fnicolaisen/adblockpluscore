@@ -39,18 +39,18 @@ describe("Filter listener", function()
     {
       let matcher = defaultMatcher["_" + type];
       let filters = [];
-      for (let map of [matcher._simpleFiltersByKeyword,
-                       matcher._complexFiltersByKeyword])
+
+      // Do one match so internal data structures are populated.
+      matcher.match(new URL("https://example.com/"), 0, "example.com");
+
+      for (let [keyword, list] of matcher._filtersByKeyword)
       {
-        for (let [keyword, set] of map)
+        for (let filter of Array.isArray(list) ? list : [list])
         {
-          for (let filterText of (typeof set == "string" ? [set] : set))
-          {
-            let filter = Filter.fromText(filterText);
-            assert.equal(matcher.findKeyword(filter), keyword,
-                         "Keyword of filter " + filter.text);
-            filters.push(filter.text);
-          }
+          filter = typeof filter == "string" ? Filter.fromText(filter) : filter;
+          assert.equal(matcher.findKeyword(filter), keyword,
+                       "Keyword of filter " + filter.text);
+          filters.push(filter.text);
         }
       }
       result[type] = filters;
