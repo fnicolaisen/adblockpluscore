@@ -269,7 +269,7 @@ describe("Matcher", function()
                 {blocking: ["bar$domain=example.com"], whitelist: []});
     checkSearch(filters, "http://example.com/foo/bar", "IMAGE",
                 "example.com", null, false, "all", {
-                  blocking: ["foo", "bar$domain=example.com"],
+                  blocking: ["bar$domain=example.com", "foo"],
                   whitelist: ["@@foo"]
                 });
 
