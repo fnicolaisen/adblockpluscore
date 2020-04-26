@@ -169,26 +169,6 @@ describe("Filter classes", function()
       postInit(filter);
     let result = serializeFilter(filter);
     assert.equal(result.sort().join("\n"), expected.sort().join("\n"), text);
-
-    // Test round-trip
-    let filter2;
-    let buffer = [...filter.serialize()];
-    if (buffer.length)
-    {
-      let map = Object.create(null);
-      for (let line of buffer.slice(1))
-      {
-        if (/(.*?)=(.*)/.test(line))
-          map[RegExp.$1] = RegExp.$2;
-      }
-      filter2 = Filter.fromObject(map);
-    }
-    else
-    {
-      filter2 = Filter.fromText(filter.text);
-    }
-
-    assert.equal(serializeFilter(filter).join("\n"), serializeFilter(filter2).join("\n"), text + " deserialization");
   }
 
   it("Definitions", function()
