@@ -23,6 +23,7 @@ const {createSandbox} = require("./_common");
 let contentTypes = null;
 let RESOURCE_TYPES = null;
 let Filter = null;
+let normalizeFilter = null;
 
 describe("Filter classes", function()
 {
@@ -33,7 +34,8 @@ describe("Filter classes", function()
     let sandboxedRequire = createSandbox();
     (
       {contentTypes, RESOURCE_TYPES} = sandboxedRequire("../lib/contentTypes"),
-      {Filter, isActiveFilter} = sandboxedRequire("../lib/filterClasses")
+      {Filter, isActiveFilter,
+       normalizeFilter} = sandboxedRequire("../lib/filterClasses")
     );
   });
 
@@ -355,64 +357,64 @@ describe("Filter classes", function()
   it("Filter normalization", function()
   {
     // Line breaks etc
-    assert.equal(Filter.normalize("\n\t\nad\ns"),
+    assert.equal(normalizeFilter("\n\t\nad\ns"),
                  "ads");
 
     // Comment filters
-    assert.equal(Filter.normalize("   !  fo  o##  bar   "),
+    assert.equal(normalizeFilter("   !  fo  o##  bar   "),
                  "!  fo  o##  bar");
 
     // Element hiding filters
-    assert.equal(Filter.normalize("   domain.c  om## # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om## # sele ctor   "),
                  "domain.com### sele ctor");
 
     // Wildcard: "*" is allowed, though not supported (yet).
-    assert.equal(Filter.normalize("   domain.*## # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.*## # sele ctor   "),
                  "domain.*### sele ctor");
 
     // Element hiding emulation filters
-    assert.equal(Filter.normalize("   domain.c  om#?# # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om#?# # sele ctor   "),
                  "domain.com#?## sele ctor");
 
     // Wildcard: "*" is allowed, though not supported (yet).
-    assert.equal(Filter.normalize("   domain.*#?# # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.*#?# # sele ctor   "),
                  "domain.*#?## sele ctor");
 
     // Incorrect syntax: the separator "#?#" cannot contain spaces; treated as a
     // regular filter instead
-    assert.equal(Filter.normalize("   domain.c  om# ?#. sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om# ?#. sele ctor   "),
                  "domain.com#?#.selector");
     // Incorrect syntax: the separator "#?#" cannot contain spaces; treated as an
     // element hiding filter instead, because the "##" following the "?" is taken
     // to be the separator instead
-    assert.equal(Filter.normalize("   domain.c  om# ?##sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om# ?##sele ctor   "),
                  "domain.com#?##sele ctor");
 
     // Element hiding exception filters
-    assert.equal(Filter.normalize("   domain.c  om#@# # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om#@# # sele ctor   "),
                  "domain.com#@## sele ctor");
 
     // Wildcard: "*" is allowed, though not supported (yet).
-    assert.equal(Filter.normalize("   domain.*#@# # sele ctor   "),
+    assert.equal(normalizeFilter("   domain.*#@# # sele ctor   "),
                  "domain.*#@## sele ctor");
 
     // Incorrect syntax: the separator "#@#" cannot contain spaces; treated as a
     // regular filter instead (not an element hiding filter either!), because
     // unlike the case with "# ?##" the "##" following the "@" is not considered
     // to be a separator
-    assert.equal(Filter.normalize("   domain.c  om# @## sele ctor   "),
+    assert.equal(normalizeFilter("   domain.c  om# @## sele ctor   "),
                  "domain.com#@##selector");
 
     // Snippet filters
-    assert.equal(Filter.normalize("   domain.c  om#$#  sni pp  et   "),
+    assert.equal(normalizeFilter("   domain.c  om#$#  sni pp  et   "),
                  "domain.com#$#sni pp  et");
 
     // Wildcard: "*" is allowed, though not supported (yet).
-    assert.equal(Filter.normalize("   domain.*#$#  sni pp  et   "),
+    assert.equal(normalizeFilter("   domain.*#$#  sni pp  et   "),
                  "domain.*#$#sni pp  et");
 
     // Regular filters
-    let normalized = Filter.normalize(
+    let normalized = normalizeFilter(
       "    b$l 	 a$sitekey=  foo  ,domain= do main.com |foo   .com,c sp= c   s p  "
     );
     assert.equal(
@@ -431,29 +433,29 @@ describe("Filter classes", function()
     );
 
     // Some $csp edge cases
-    assert.equal(Filter.normalize("$csp=  "),
+    assert.equal(normalizeFilter("$csp=  "),
                  "$csp=");
-    assert.equal(Filter.normalize("$csp= c s p"),
+    assert.equal(normalizeFilter("$csp= c s p"),
                  "$csp=c s p");
-    assert.equal(Filter.normalize("$$csp= c s p"),
+    assert.equal(normalizeFilter("$$csp= c s p"),
                  "$$csp=c s p");
-    assert.equal(Filter.normalize("$$$csp= c s p"),
+    assert.equal(normalizeFilter("$$$csp= c s p"),
                  "$$$csp=c s p");
-    assert.equal(Filter.normalize("foo?csp=b a r$csp=script-src  'self'"),
+    assert.equal(normalizeFilter("foo?csp=b a r$csp=script-src  'self'"),
                  "foo?csp=bar$csp=script-src 'self'");
-    assert.equal(Filter.normalize("foo$bar=c s p = ba z,cs p = script-src  'self'"),
+    assert.equal(normalizeFilter("foo$bar=c s p = ba z,cs p = script-src  'self'"),
                  "foo$bar=csp=baz,csp=script-src 'self'");
-    assert.equal(Filter.normalize("foo$csp=c s p csp= ba z,cs p  = script-src  'self'"),
+    assert.equal(normalizeFilter("foo$csp=c s p csp= ba z,cs p  = script-src  'self'"),
                  "foo$csp=c s p csp= ba z,csp=script-src 'self'");
-    assert.equal(Filter.normalize("foo$csp=bar,$c sp=c s p"),
+    assert.equal(normalizeFilter("foo$csp=bar,$c sp=c s p"),
                  "foo$csp=bar,$csp=c s p");
-    assert.equal(Filter.normalize(" f o   o   $      bar   $csp=ba r"),
+    assert.equal(normalizeFilter(" f o   o   $      bar   $csp=ba r"),
                  "foo$bar$csp=ba r");
-    assert.equal(Filter.normalize("f    $    o    $    o    $    csp=f o o "),
+    assert.equal(normalizeFilter("f    $    o    $    o    $    csp=f o o "),
                  "f$o$o$csp=f o o");
-    assert.equal(Filter.normalize("/foo$/$ csp = script-src  http://example.com/?$1=1&$2=2&$3=3"),
+    assert.equal(normalizeFilter("/foo$/$ csp = script-src  http://example.com/?$1=1&$2=2&$3=3"),
                  "/foo$/$csp=script-src http://example.com/?$1=1&$2=2&$3=3");
-    assert.equal(Filter.normalize("||content.server.com/files/*.php$rewrite= $1"),
+    assert.equal(normalizeFilter("||content.server.com/files/*.php$rewrite= $1"),
                  "||content.server.com/files/*.php$rewrite=$1");
   });
 
