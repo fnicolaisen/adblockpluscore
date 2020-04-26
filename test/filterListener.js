@@ -29,6 +29,7 @@ let Filter = null;
 let defaultMatcher = null;
 let SpecialSubscription = null;
 let recommendations = null;
+let filterState = null;
 
 describe("Filter listener", function()
 {
@@ -99,7 +100,8 @@ describe("Filter listener", function()
       {filterStorage} = sandboxedRequire("../lib/filterStorage"),
       {filterEngine} = sandboxedRequire("../lib/filterEngine"),
       {defaultMatcher} = sandboxedRequire("../lib/matcher"),
-      {Filter} = sandboxedRequire("../lib/filterClasses")
+      {Filter} = sandboxedRequire("../lib/filterClasses"),
+      {filterState} = sandboxedRequire("../lib/filterState")
     );
   });
 
@@ -196,7 +198,7 @@ describe("Filter listener", function()
 
       filterStorage.removeFilter(filter1);
       checkKnownFilters("remove filter1", {whitelist: [filter2.text], elemhide: [filter3.text], elemhideexception: [filter5.text, filter7.text], elemhideemulation: [filter6.text]});
-      filter2.disabled = true;
+      filterState.setEnabled(filter2.text, false);
       checkKnownFilters("disable filter2", {elemhide: [filter3.text], elemhideexception: [filter5.text, filter7.text], elemhideemulation: [filter6.text]});
       filterStorage.removeFilter(filter2);
       checkKnownFilters("remove filter2", {elemhide: [filter3.text], elemhideexception: [filter5.text, filter7.text], elemhideemulation: [filter6.text]});
@@ -213,34 +215,34 @@ describe("Filter listener", function()
       let filter5 = Filter.fromText("example.com#?#:-abp-properties(filter5)");
       let filter6 = Filter.fromText("example.com#@#[-abp-properties='filter6']");
 
-      filter1.disabled = true;
+      filterState.setEnabled(filter1.text, false);
       checkKnownFilters("disable filter1 while not in list", {});
-      filter1.disabled = false;
+      filterState.setEnabled(filter1.text, true);
       checkKnownFilters("enable filter1 while not in list", {});
 
-      filter2.disabled = true;
+      filterState.setEnabled(filter2.text, false);
       checkKnownFilters("disable @@filter2 while not in list", {});
-      filter2.disabled = false;
+      filterState.setEnabled(filter2.text, true);
       checkKnownFilters("enable @@filter2 while not in list", {});
 
-      filter3.disabled = true;
+      filterState.setEnabled(filter3.text, false);
       checkKnownFilters("disable ##filter3 while not in list", {});
-      filter3.disabled = false;
+      filterState.setEnabled(filter3.text, true);
       checkKnownFilters("enable ##filter3 while not in list", {});
 
-      filter4.disabled = true;
+      filterState.setEnabled(filter4.text, false);
       checkKnownFilters("disable #@#filter4 while not in list", {});
-      filter4.disabled = false;
+      filterState.setEnabled(filter4.text, true);
       checkKnownFilters("enable #@#filter4 while not in list", {});
 
-      filter5.disabled = true;
+      filterState.setEnabled(filter5.text, false);
       checkKnownFilters("disable example.com#?#:-abp-properties(filter5) while not in list", {});
-      filter5.disabled = false;
+      filterState.setEnabled(filter5.text, true);
       checkKnownFilters("enable example.com#?#:-abp-properties(filter5) while not in list", {});
 
-      filter6.disabled = true;
+      filterState.setEnabled(filter6.text, false);
       checkKnownFilters("disable example.com#@#[-abp-properties='filter6'] while not in list", {});
-      filter6.disabled = false;
+      filterState.setEnabled(filter6.text, true);
       checkKnownFilters("enable example.com#@#[-abp-properties='filter6'] while not in list", {});
     });
 
@@ -248,7 +250,7 @@ describe("Filter listener", function()
     {
       let filter1 = Filter.fromText("filter1");
       let filter2 = Filter.fromText("@@filter2");
-      filter2.disabled = true;
+      filterState.setEnabled(filter2.text, false);
       let filter3 = Filter.fromText("##filter3");
       let filter4 = Filter.fromText("!filter4");
       let filter5 = Filter.fromText("#@#filter5");
@@ -267,7 +269,7 @@ describe("Filter listener", function()
       filterStorage.addSubscription(subscription);
       checkKnownFilters("add subscription with filter1, @@filter2, ##filter3, !filter4, #@#filter5, example.com#?#:-abp-properties(filter6), example.com#@#[-abp-properties='filter7']", {blocking: [filter1.text], elemhide: [filter3.text], elemhideexception: [filter5.text, filter7.text], elemhideemulation: [filter6.text]});
 
-      filter2.disabled = false;
+      filterState.setEnabled(filter2.text, true);
       checkKnownFilters("enable @@filter2", {blocking: [filter1.text], whitelist: [filter2.text], elemhide: [filter3.text], elemhideexception: [filter5.text, filter7.text], elemhideemulation: [filter6.text]});
 
       filterStorage.addFilter(filter1);
@@ -282,12 +284,12 @@ describe("Filter listener", function()
       filterStorage.updateSubscriptionFilters(subscription, [filter1.text, filter2.text]);
       checkKnownFilters("change subscription filters to filter1, filter2", {blocking: [filter1.text], whitelist: [filter2.text]});
 
-      filter1.disabled = true;
+      filterState.setEnabled(filter1.text, false);
       checkKnownFilters("disable filter1", {whitelist: [filter2.text]});
-      filter2.disabled = true;
+      filterState.setEnabled(filter2.text, false);
       checkKnownFilters("disable filter2", {});
-      filter1.disabled = false;
-      filter2.disabled = false;
+      filterState.setEnabled(filter1.text, true);
+      filterState.setEnabled(filter2.text, true);
       checkKnownFilters("enable filter1, filter2", {blocking: [filter1.text], whitelist: [filter2.text]});
 
       filterStorage.addFilter(filter1);

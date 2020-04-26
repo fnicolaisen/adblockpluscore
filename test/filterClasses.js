@@ -65,10 +65,6 @@ describe("Filter classes", function()
     }
     else if (filter instanceof ActiveFilter)
     {
-      result.push("disabled=" + filter.disabled);
-      result.push("lastHit=" + filter.lastHit);
-      result.push("hitCount=" + filter.hitCount);
-
       let domains = [];
       if (filter.domains)
       {
@@ -137,14 +133,6 @@ describe("Filter classes", function()
         expected.push(prop + "=" + value);
     }
 
-    if (type == "whitelist" || type == "blocking" || type == "elemhide" ||
-        type == "elemhideexception" || type == "elemhideemulation" ||
-        type == "snippet")
-    {
-      addProperty("disabled", "false");
-      addProperty("lastHit", "0");
-      addProperty("hitCount", "0");
-    }
     if (type == "whitelist" || type == "blocking")
     {
       addProperty("contentType", RESOURCE_TYPES);
@@ -258,30 +246,6 @@ describe("Filter classes", function()
     checkElemHideEmulationFilterInvalid("~foo.com,~bar.com");
     checkElemHideEmulationFilterInvalid("foo");
     checkElemHideEmulationFilterInvalid("~foo.com,bar");
-  });
-
-  it("Filters with state", function()
-  {
-    compareFilter("blabla", ["type=blocking", "text=blabla"]);
-    compareFilter(
-      "blabla_default", ["type=blocking", "text=blabla_default"],
-      filter =>
-      {
-        filter.disabled = false;
-        filter.hitCount = 0;
-        filter.lastHit = 0;
-      }
-    );
-    compareFilter(
-      "blabla_non_default",
-      ["type=blocking", "text=blabla_non_default", "disabled=true", "hitCount=12", "lastHit=20"],
-      filter =>
-      {
-        filter.disabled = true;
-        filter.hitCount = 12;
-        filter.lastHit = 20;
-      }
-    );
   });
 
   it("Special characters", function()

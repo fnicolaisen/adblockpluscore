@@ -25,6 +25,7 @@ let filterNotifier = null;
 let filterStorage = null;
 let filterEngine = null;
 let Subscription = null;
+let filterState = null;
 
 describe("Filter storage", function()
 {
@@ -37,7 +38,8 @@ describe("Filter storage", function()
       {filterNotifier} = sandboxedRequire("../lib/filterNotifier"),
       {filterStorage} = sandboxedRequire("../lib/filterStorage"),
       {filterEngine} = sandboxedRequire("../lib/filterEngine"),
-      {Subscription} = sandboxedRequire("../lib/subscriptionClasses")
+      {Subscription} = sandboxedRequire("../lib/subscriptionClasses"),
+      {filterState} = sandboxedRequire("../lib/filterState")
     );
 
     await filterEngine.initialize();
@@ -419,33 +421,33 @@ describe("Filter storage", function()
 
     filterStorage.addFilter(filter1);
 
-    assert.equal(filter1.hitCount, 0, "filter1 initial hit count");
-    assert.equal(filter2.hitCount, 0, "filter2 initial hit count");
-    assert.equal(filter1.lastHit, 0, "filter1 initial last hit");
-    assert.equal(filter2.lastHit, 0, "filter2 initial last hit");
+    assert.equal(filterState.getHitCount(filter1.text), 0, "filter1 initial hit count");
+    assert.equal(filterState.getHitCount(filter2.text), 0, "filter2 initial hit count");
+    assert.equal(filterState.getLastHit(filter1.text), 0, "filter1 initial last hit");
+    assert.equal(filterState.getLastHit(filter2.text), 0, "filter2 initial last hit");
 
     changes = [];
     filterStorage.increaseHitCount(filter1);
-    assert.equal(filter1.hitCount, 1, "Hit count after increase (filter in list)");
-    assert.ok(filter1.lastHit > 0, "Last hit changed after increase");
+    assert.equal(filterState.getHitCount(filter1.text), 1, "Hit count after increase (filter in list)");
+    assert.ok(filterState.getLastHit(filter1.text) > 0, "Last hit changed after increase");
     assert.deepEqual(changes, ["filterState.hitCount filter1", "filterState.lastHit filter1"], "Received changes");
 
     changes = [];
     filterStorage.increaseHitCount(filter2);
-    assert.equal(filter2.hitCount, 1, "Hit count after increase (filter not in list)");
-    assert.ok(filter2.lastHit > 0, "Last hit changed after increase");
+    assert.equal(filterState.getHitCount(filter2.text), 1, "Hit count after increase (filter not in list)");
+    assert.ok(filterState.getLastHit(filter2.text) > 0, "Last hit changed after increase");
     assert.deepEqual(changes, ["filterState.hitCount filter2", "filterState.lastHit filter2"], "Received changes");
 
     changes = [];
     filterStorage.resetHitCounts([filter1]);
-    assert.equal(filter1.hitCount, 0, "Hit count after reset");
-    assert.equal(filter1.lastHit, 0, "Last hit after reset");
+    assert.equal(filterState.getHitCount(filter1.text), 0, "Hit count after reset");
+    assert.equal(filterState.getLastHit(filter1.text), 0, "Last hit after reset");
     assert.deepEqual(changes, ["filterState.hitCount filter1", "filterState.lastHit filter1"], "Received changes");
 
     changes = [];
     filterStorage.resetHitCounts(null);
-    assert.equal(filter2.hitCount, 0, "Hit count after complete reset");
-    assert.equal(filter2.lastHit, 0, "Last hit after complete reset");
+    assert.equal(filterState.getHitCount(filter2.text), 0, "Hit count after complete reset");
+    assert.equal(filterState.getLastHit(filter2.text), 0, "Last hit after complete reset");
     assert.deepEqual(changes, ["filterState.hitCount filter2", "filterState.lastHit filter2"], "Received changes");
   });
 
