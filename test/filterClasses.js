@@ -23,30 +23,17 @@ const {createSandbox} = require("./_common");
 let contentTypes = null;
 let RESOURCE_TYPES = null;
 let Filter = null;
-let InvalidFilter = null;
-let CommentFilter = null;
-let ActiveFilter = null;
-let URLFilter = null;
-let BlockingFilter = null;
-let ContentFilter = null;
-let WhitelistFilter = null;
-let ElemHideBase = null;
-let ElemHideFilter = null;
-let ElemHideException = null;
-let ElemHideEmulationFilter = null;
-let SnippetFilter = null;
 
 describe("Filter classes", function()
 {
+  let isActiveFilter = null;
+
   beforeEach(function()
   {
     let sandboxedRequire = createSandbox();
     (
       {contentTypes, RESOURCE_TYPES} = sandboxedRequire("../lib/contentTypes"),
-      {Filter, InvalidFilter, CommentFilter, ActiveFilter, URLFilter,
-       BlockingFilter, WhitelistFilter, ContentFilter, ElemHideBase,
-       ElemHideFilter, ElemHideException, ElemHideEmulationFilter,
-       SnippetFilter} = sandboxedRequire("../lib/filterClasses")
+      {Filter, isActiveFilter} = sandboxedRequire("../lib/filterClasses")
     );
   });
 
@@ -54,16 +41,19 @@ describe("Filter classes", function()
   {
     // Filter serialization only writes out essential properties, need to do a full serialization here
     let result = [];
+
+    let {type} = filter;
+
     result.push("text=" + filter.text);
-    result.push("type=" + filter.type);
-    if (filter instanceof InvalidFilter)
+    result.push("type=" + type);
+    if (type == "invalid")
     {
       result.push("reason=" + filter.reason);
     }
-    else if (filter instanceof CommentFilter)
+    else if (type == "comment")
     {
     }
-    else if (filter instanceof ActiveFilter)
+    else if (isActiveFilter(filter))
     {
       let domains = [];
       if (filter.domains)
@@ -76,7 +66,7 @@ describe("Filter classes", function()
       }
       result.push("domains=" + domains.sort().join("|"));
 
-      if (filter instanceof URLFilter)
+      if (type == "blocking" || type == "whitelist")
       {
         result.push("regexp=" + (filter.regexp ? filter.regexp.source : null));
         result.push("contentType=" + filter.contentType);
@@ -86,16 +76,17 @@ describe("Filter classes", function()
         result.push("sitekeys=" + sitekeys.slice().sort().join("|"));
 
         result.push("thirdParty=" + filter.thirdParty);
-        if (filter instanceof BlockingFilter)
+        if (type == "blocking")
         {
           result.push("csp=" + filter.csp);
           result.push("rewrite=" + filter.rewrite);
         }
-        else if (filter instanceof WhitelistFilter)
+        else if (type == "whitelist")
         {
         }
       }
-      else if (filter instanceof ElemHideBase)
+      else if (type == "elemhide" || type == "elemhideexception" ||
+               type == "elemhideemulation")
       {
         result.push("selectorDomains=" +
                     [...filter.domains || []]
@@ -103,7 +94,7 @@ describe("Filter classes", function()
                     .map(([domain]) => domain.toLowerCase()));
         result.push("selector=" + filter.selector);
       }
-      else if (filter instanceof SnippetFilter)
+      else if (type == "snippet")
       {
         result.push("scriptDomains=" +
                     [...filter.domains || []]
@@ -170,24 +161,6 @@ describe("Filter classes", function()
     let result = serializeFilter(filter);
     assert.equal(result.sort().join("\n"), expected.sort().join("\n"), text);
   }
-
-  it("Definitions", function()
-  {
-    assert.equal(typeof Filter, "function", "typeof Filter");
-    assert.equal(typeof InvalidFilter, "function", "typeof InvalidFilter");
-    assert.equal(typeof CommentFilter, "function", "typeof CommentFilter");
-    assert.equal(typeof ActiveFilter, "function", "typeof ActiveFilter");
-    assert.equal(typeof URLFilter, "function", "typeof URLFilter");
-    assert.equal(typeof BlockingFilter, "function", "typeof BlockingFilter");
-    assert.equal(typeof ContentFilter, "function", "typeof ContentFilter");
-    assert.equal(typeof WhitelistFilter, "function", "typeof WhitelistFilter");
-    assert.equal(typeof ElemHideBase, "function", "typeof ElemHideBase");
-    assert.equal(typeof ElemHideFilter, "function", "typeof ElemHideFilter");
-    assert.equal(typeof ElemHideException, "function", "typeof ElemHideException");
-    assert.equal(typeof ElemHideEmulationFilter, "function",
-                 "typeof ElemHideEmulationFilter");
-    assert.equal(typeof SnippetFilter, "function", "typeof SnippetFilter");
-  });
 
   it("Comments", function()
   {
@@ -344,7 +317,7 @@ describe("Filter classes", function()
     for (let filterText of emptyDomainFilters)
     {
       let filter = Filter.fromText(filterText);
-      assert.ok(filter instanceof InvalidFilter);
+      assert.ok(filter.type == "invalid");
       assert.equal(filter.reason, "filter_invalid_domain");
     }
   });
@@ -488,13 +461,13 @@ describe("Filter classes", function()
   {
     let text = "/(content\\.server\\/file\\/.*\\.txt)\\?.*$/$rewrite=$1";
     let filter = Filter.fromText(text);
-    assert.ok(filter instanceof InvalidFilter);
+    assert.ok(filter.type == "invalid");
     assert.equal(filter.type, "invalid");
     assert.equal(filter.reason, "filter_invalid_rewrite");
 
     text = "||/(content\\.server\\/file\\/.*\\.txt)\\?.*$/$rewrite=blank-text,domains=content.server";
     filter = Filter.fromText(text);
-    assert.ok(filter instanceof InvalidFilter);
+    assert.ok(filter.type == "invalid");
     assert.equal(filter.type, "invalid");
     assert.equal(filter.reason, "filter_invalid_rewrite");
 

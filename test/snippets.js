@@ -26,7 +26,6 @@ let snippets = null;
 let parseScript = null;
 let compileScript = null;
 let Filter = null;
-let SnippetFilter = null;
 
 describe("Snippets", function()
 {
@@ -34,7 +33,7 @@ describe("Snippets", function()
   {
     let sandboxedRequire = createSandbox();
     (
-      {Filter, SnippetFilter} = sandboxedRequire("../lib/filterClasses"),
+      {Filter} = sandboxedRequire("../lib/filterClasses"),
       {snippets, parseScript, compileScript} = sandboxedRequire("../lib/snippets")
     );
   });
@@ -45,7 +44,7 @@ describe("Snippets", function()
     {
       for (let filter of filters.map(Filter.fromText))
       {
-        if (filter instanceof SnippetFilter)
+        if (filter.type == "snippet")
           snippets.add(filter);
       }
 
